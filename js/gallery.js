@@ -83,26 +83,38 @@ const galleryMarkup = images.map(({ preview, original, description }) => `
 
 galleryContainer.innerHTML = galleryMarkup;
 
-galleryContainer.addEventListener('click', onGalleryClick);
+galleryContainer.addEventListener('click', onGalleryItemClick);
 
-function onGalleryClick(event) {
-    event.preventDefault();
-    if (event.target.nodeName !== 'IMG') {
-      return;
-    }
-  
-    const imageSrc = event.target.dataset.source;
-  
-    const instance = basicLightbox.create(`
-      <img src="${imageSrc}" width="800" height="600">
+function onGalleryItemClick(event) {
+  event.preventDefault();
+  const clickedElement = event.target;
+  if (!isImage(clickedElement)) {
+    return;
+  }
+    
+  const imageSrc = clickedElement.dataset.source;
+  const instance = basicLightbox.create(`
+      <img src="${imageSrc}" width="1112" height="640">
     `);
   
-    instance.show();
+  instance.show();
   
+  const closeHandler = () => {
+    instance.close();
+    document.removeEventListener('keydown', onEscapePress);
+  };
+
+  const onEscapePress = (event) => {
+    if (event.key === 'Escape') {
+      closeHandler();
+    }
+  };
     
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        instance.close();
-      }
-    }, { once: true }); 
-  }
+  document.addEventListener('keydown', onEscapePress);
+  instance.onClose(closeHandler);
+}
+
+    function isImage(element) {
+  return element.nodeName === 'IMG';
+}
+  
